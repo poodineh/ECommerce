@@ -1,4 +1,4 @@
-﻿namespace ECommerce.Api.Products.MapProfiles
+﻿namespace ECommerce.Api.Products.Profiles
 {
     public class ProductProfile : AutoMapper.Profile
     {

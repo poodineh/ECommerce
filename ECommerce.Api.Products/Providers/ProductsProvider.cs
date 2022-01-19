@@ -1,77 +1,79 @@
-﻿using AutoMapper;
-using ECommerce.Api.Products.Db;
-using ECommerce.Api.Products.Interfaces;
-using ECommerce.Api.Products.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using ECommerce.Api.Products.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using ECommerce.Api.Products.Models;
+using AutoMapper;
 
 namespace ECommerce.Api.Products.Providers
 {
     public class ProductsProvider : IProductsProvider
     {
-        private readonly ProductsDbContext _dbContext;
-        private readonly ILogger<ProductsProvider> _logger;
-        private readonly IMapper _mapper;
+        private readonly Db.ProductsDbContext dbContext;
+        private readonly ILogger<ProductsProvider> logger;
+        private readonly IMapper mapper;
 
-        public ProductsProvider(ProductsDbContext dbContext, ILogger<ProductsProvider> logger, IMapper mapper)
+        public ProductsProvider(Db.ProductsDbContext dbContext, ILogger<ProductsProvider> logger, IMapper mapper)
         {
-            _dbContext = dbContext;
-            _logger = logger;
-            _mapper = mapper;
-
+            this.dbContext = dbContext;
+            this.logger = logger;
+            this.mapper = mapper;
             SeedData();
         }
 
         private void SeedData()
         {
-            if (!_dbContext.Products.Any())
+            if (!dbContext.Products.Any())
             {
-                _dbContext.Products.Add(new Db.Product() { Id = 1, Name = "P1", Price = 10, Inventory = 5 });
-                _dbContext.Products.Add(new Db.Product() { Id = 2, Name = "p2", Price = 11, Inventory = 10 });
-                _dbContext.Products.Add(new Db.Product() { Id = 3, Name = "p3", Price = 12, Inventory = 15 });
-                _dbContext.Products.Add(new Db.Product() { Id = 4, Name = "p4", Price = 13, Inventory = 100 });
-                _dbContext.SaveChanges();
+                dbContext.Products.Add(new Db.Product() { Id = 1, Name = "Keyboard", Price = 20, Inventory = 100 });
+                dbContext.Products.Add(new Db.Product() { Id = 2, Name = "Mouse", Price = 5, Inventory = 200 });
+                dbContext.Products.Add(new Db.Product() { Id = 3, Name = "Monitor", Price = 150, Inventory = 1000 });
+                dbContext.Products.Add(new Db.Product() { Id = 4, Name = "CPU", Price = 200, Inventory = 2000 });
+                dbContext.SaveChanges();
             }
         }
 
-        public async Task<(bool IsSuccess, IEnumerable<Models.Product> products, string ErrorMessage)> GetProductsAsync()
+        public async Task<(bool IsSuccess, Product Product, string ErrorMessage)> GetProductAsync(int id)
         {
             try
             {
-                var products = await _dbContext.Products.ToListAsync();
-                if (products != null && products.Any())
+                logger?.LogInformation($"Querying products with id: {id}");
+                var product = await dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+                if (product != null)
                 {
-                    var result = _mapper.Map<IEnumerable<Db.Product>, IEnumerable<Models.Product>>(products);
+                    logger?.LogInformation("Product found");
+                    var result = mapper.Map<Product>(product);
                     return (true, result, null);
                 }
-                return (false, null, "Not Found!");
+                return (false, null, "Not found");
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex.ToString());
+                logger?.LogError(ex.ToString());
                 return (false, null, ex.Message);
             }
         }
 
-        public async Task<(bool IsSuccess, Models.Product product, string ErrorMessage)> GetProductByIdAsync(int id)
+        public async Task<(bool IsSuccess, IEnumerable<Product> Products, string ErrorMessage)> GetProductsAsync()
         {
             try
             {
-                var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
-                if (product != null)
+                logger?.LogInformation("Querying products");
+                var products = await dbContext.Products.ToListAsync();
+                if (products!=null && products.Any())
                 {
-                    var result = _mapper.Map<Db.Product, Models.Product>(product);
+                    logger?.LogInformation($"{products.Count} product(s) found");
+                    var result = mapper.Map<IEnumerable<Product>>(products);
                     return (true, result, null);
                 }
-                return (false, null, "Not Found!");
+                return (false, null, "Not found");
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex.ToString());
+                logger?.LogError(ex.ToString());
                 return (false, null, ex.Message);
             }
         }

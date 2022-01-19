@@ -14,7 +14,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 
 namespace ECommerce.Api.Customers
 {
@@ -37,10 +36,6 @@ namespace ECommerce.Api.Customers
             services.AddScoped<ICustomersProvider, CustomersProvider>();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerce.Api.Customers", Version = "v1" });
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,8 +44,6 @@ namespace ECommerce.Api.Customers
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ECommerce.Api.Customers v1"));
             }
 
             app.UseRouting();

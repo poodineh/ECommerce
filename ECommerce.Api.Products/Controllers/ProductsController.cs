@@ -5,32 +5,36 @@ using System.Threading.Tasks;
 namespace ECommerce.Api.Products.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class ProductsController:ControllerBase
+    [Route("api/products")]
+    public class ProductsController : ControllerBase
     {
-        private readonly IProductsProvider _productsProvider;
+        private readonly IProductsProvider productsProvider;
 
         public ProductsController(IProductsProvider productsProvider)
         {
-            _productsProvider = productsProvider;
+            this.productsProvider = productsProvider;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetProductsAsync()
         {
-            var result = await _productsProvider.GetProductsAsync();
-            if (result.IsSuccess)
-                return Ok(result.products);
-            return NotFound();
+            var all = await productsProvider.GetProductsAsync();
+            if (all.IsSuccess)
+            {
+                return Ok(all.Products);
+            }
+            return NotFound(all.ErrorMessage);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductAsync(int id)
         {
-            var result = await _productsProvider.GetProductByIdAsync(id);
+            var result = await productsProvider.GetProductAsync(id);
             if (result.IsSuccess)
-                return Ok(result.product);
-            return NotFound();
+            {
+                return Ok(result.Product);
+            }
+            return NotFound(result.ErrorMessage);
         }
     }
 }
