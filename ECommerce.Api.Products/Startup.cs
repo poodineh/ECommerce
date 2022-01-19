@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace ECommerce.Api.Products
 {
@@ -25,6 +26,10 @@ namespace ECommerce.Api.Products
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplicationInsightsTelemetry("8ea3060a-8e0e-4368-830a-48b2d4116c97");
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerce.Api.Products", Version = "v1" });
+            });
             services.AddControllers();
             services.AddScoped<IProductsProvider, ProductsProvider>();
             services.AddAutoMapper(typeof(Startup));
@@ -38,6 +43,8 @@ namespace ECommerce.Api.Products
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ECommerce.Api.Products v1"));
             }
 
             app.UseRouting();

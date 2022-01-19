@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace ECommerce.Api.Orders
 {
@@ -27,6 +28,10 @@ namespace ECommerce.Api.Orders
             {
                 options.UseInMemoryDatabase("Orders");
             });
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerce.Api.Orders", Version = "v1" });
+            });
             services.AddScoped<IOrdersProvider, OrdersProvider>();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
@@ -38,6 +43,8 @@ namespace ECommerce.Api.Orders
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ECommerce.Api.Orders v1"));
             }
 
             app.UseHttpsRedirection();
